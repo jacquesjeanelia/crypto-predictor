@@ -140,7 +140,7 @@ def cleanup(df, csv_name: str = "crypto_ohlcv_data_total_cleaned"):
     # df.to_csv(f'out/preprocessed/{csv_name}_preprocessed.csv', index=True)
 
     feature_columns = [
-        'hour', 'day_of_week',
+        'symbol', 'hour', 'day_of_week',
         'returns', 'volatility',
         'upper_wick', 'lower_wick', 
         'taker_buy_ratio', 'body_ratio', 
