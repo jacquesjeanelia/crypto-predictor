@@ -5,7 +5,7 @@ import numpy as np
 def get_dfs(total: bool = False):
     # Download the files from Hugging Face Hub and read them into a single DataFrame
     print("Downloading files from Hugging Face Hub...")
-    token = "YOUR_HUGGINGFACE_TOKEN"
+    token = "YOUR_HUGGINGFACE_TOKEN"  # Replace with your actual Hugging Face token
     repo_id = "zongowo111/v2-crypto-ohlcv-data"
 
     api = HfApi(token=token)
@@ -137,6 +137,8 @@ def cleanup(df, csv_name: str = "crypto_ohlcv_data_total_cleaned"):
     df = df.replace([np.inf, -np.inf], np.nan)
     df = df.dropna().reset_index(drop=True)
 
+    # df.to_csv(f'out/preprocessed/{csv_name}_preprocessed.csv', index=True)
+
     feature_columns = [
         'hour', 'day_of_week',
         'returns', 'volatility',
@@ -149,9 +151,6 @@ def cleanup(df, csv_name: str = "crypto_ohlcv_data_total_cleaned"):
         lower_limit = df[col].quantile(0.001)
         upper_limit = df[col].quantile(0.999)
         df[col] = df[col].clip(lower=lower_limit, upper=upper_limit)
-
-    X = df[feature_columns]
-    y = df['label']
 
     # For each symbol, split the dataset chronologically into training and testing sets (80% train, 20% test)
     train_list, test_list = [], []
@@ -168,12 +167,12 @@ def cleanup(df, csv_name: str = "crypto_ohlcv_data_total_cleaned"):
 
     df = df[feature_columns + ['label']]
 
-    df.to_csv(f'{csv_name}.csv', index=True)
+    df.to_csv(f'out/processed/{csv_name}.csv', index=True)
 
 def run():
-    # # Get all datapoints, sorted by open time
-    # total_df = get_dfs(True)
-    # cleanup(total_df, "crypto_ohlcv_data_total_cleaned")
+    # Get all datapoints, sorted by open time
+    total_df = get_dfs(True)
+    cleanup(total_df, "crypto_ohlcv_data_total_cleaned")
     # Get data separated: 15min, 1h, 1d intervals
     distinct_dfs = get_dfs(False)
     cleanup(distinct_dfs[0], "crypto_ohlcv_data_1min_cleaned")
@@ -182,15 +181,4 @@ def run():
     cleanup(distinct_dfs[3], "crypto_ohlcv_data_1d_cleaned")
 
 if __name__ == "__main__":
-    # run()
-    # read csv to df
-    df1 = pd.read_csv("crypto_ohlcv_data_1min_cleaned.csv", index_col=0)
-    print("1min: ", len(df1))
-    df2 = pd.read_csv("crypto_ohlcv_data_15min_cleaned.csv", index_col=0)
-    print("15min: ", len(df2))
-    df3 = pd.read_csv("crypto_ohlcv_data_1h_cleaned.csv", index_col=0)
-    print("1h: ", len(df3))
-    df4 = pd.read_csv("crypto_ohlcv_data_1d_cleaned.csv", index_col=0)
-    print("1d: ", len(df4))
-    df_total = pd.read_csv("crypto_ohlcv_data_total_cleaned.csv", index_col=0)
-    print("total: ", len(df_total))
+    run()
