@@ -1,0 +1,41 @@
+y = -1 if (close_t+1 - close_t) / close_t < -delta 
+y = 1 if (close_t+1 - close_t) / close_t > delta 
+y = 0 else
+
+hour 
+day
+
+upper_wick = (high - max(open, close)) / close (selling pressure at highs) divide by close to get percentage compared to the asset's price
+
+lower_wick = (min(open, close) - low) /close (buying support at lows) 
+
+returns = (close - open) / open (know if previous candle was up or down)
+
+taker_buy_ratio = taker_buy_volume / volume (takers or makers dominate)
+
+body_ratio = (close - open) / (high - low + epsilon) (1:buyers or -1:sellers dominate), epsilon to avoid dividing by 0
+
+volatility = (high-low) / close
+
+relative volume = volume / (mean20volume)
+normalized volatility = std20(returns)
+
+
+CLEANING:
+
+Some files measure each 1min, each 15mins, each 1hour, each 1day so i have 1 total file and one file for each. all grouped by asset and sorted by time 
+
+Drop the first 20 rows which have no relative volume or normalized volatility
+
+0s in Prices (open, high, low, close): cannot be 0, fill with next value
+0s in Volumes and Counts (volume, number_of_trades, taker_buy_...): leave as 0, means no trading activity
+
+in taker_buy_ratio: replace NaN by 0.5 since range from 0 to 1 (represents 50% buyers, 50% sellers), keep 0s as is since no taker buy volume
+
+
+relative volume NaN: replace with 0 since no trading
+normalized volatility NaN: flat price for 20 rows -> no difference (0 z-score in the middle)
+
+clip the extreme feature values at 0.1% and 99.9%
+
+Split the dataset chronologically into training and testing sets (80% train, 20% test)
